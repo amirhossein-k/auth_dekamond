@@ -6,16 +6,18 @@ import { useState } from "react"
 import { SignUp } from "../../../../actions/Signup"
 import { useMutation } from "@tanstack/react-query"
 import toast from "react-hot-toast"
-
+import styles from '@/app/style/register.module.scss'
+import { useUserContext } from "@/context/UserContext"
 
 
 
 
 const RegisterPage = () => {
-console.log('dd')
     const [errorMessage,setErrorMessage] = useState('')
     const [pending,setPending] = useState<boolean>(false)
     
+    const {setUser} = useUserContext()
+
     // valid phoneNumber 
     const validPhone = (phone:string)=>{
         const phoneReg = /^(\+98|0)?9\d{9}$/
@@ -24,10 +26,16 @@ console.log('dd')
     // for register
     const mutationUser = useMutation({
         mutationFn:()=>SignUp(),
-        onSuccess:(data)=>{
-            if(data.success){
+        onSuccess:async(data)=>{
+            console.log('eeeeeeeeee')
+            if(data.success && data.data){
+                
+                    console.log(data.data,'oooiiiei')
+                    setUser(data.data.user)
+                
+                toast.success(`ثبت‌نام موفق! خوش آمدید ${JSON.stringify(data.data?.user.name.first)}`)
+                    await new Promise((resolve)=>setTimeout(resolve,1000))
 
-                toast.success('ورود موفق')
                 console.log(data)
                 window.location.href = '/dashboard' // هدایت به صفحه لاگین
             }else{
@@ -50,14 +58,9 @@ console.log('dd')
         setErrorMessage('')
         const formDataRegister = new FormData(e.currentTarget)
         const phone_numer = formDataRegister.get('phone') as string
-        const name = formDataRegister.get('name') as string
 
 
-        if(!name){
-            setPending(false)
-            setErrorMessage('اسم قشنگتو وارد کن')
-            return
-        }
+        
         if(!phone_numer){
             setErrorMessage("شماره تلفن الزامیه کاربر محترم")
             setPending(false)
@@ -73,7 +76,7 @@ mutationUser.mutate()
     }
 
   return (
-     <div className=" w-full  h-screen flex justify-center items-center">
+     <div className= {`  h-screen flex justify-center items-center  ${styles.container}`} >
 
          <div className="max-w-md mx-auto text-black bg-white rounded-lg px-2 py-3 w-full  ">
             <h1 className="text-center text-xl shadow-md my-2 py-2 "> فرم ثبت نام </h1>
@@ -83,16 +86,7 @@ mutationUser.mutate()
         </div>
       )}
             <form onSubmit={handleSubmitt} className="space-y-4 text-black">
-            <div className="mb-4">
-          <label htmlFor="name" className="block mb-1 ">نام:</label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            required
-            className="border-2 p-2 w-full"
-          />
-        </div>
+           
      <div className="mb-4">
                         <label htmlFor="phone" className="block mb-1">شماره تلفن:</label>
                         <input
@@ -113,8 +107,7 @@ mutationUser.mutate()
             <p className="flex flex-row-reverse mt-2 " >
                
                 <Link href="/login" className="text-blue-600 hover:underline hover:text-black">
-          وارد شوید
-        </Link>
+صفحه اصلی        </Link>
             </p>
         </div>
 
